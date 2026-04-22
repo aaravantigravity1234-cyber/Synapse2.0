@@ -142,8 +142,6 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
 
   try {
-    console.log(`[DEBUG] Routing request to: ${targetModel}`);
-
     const systemPromptText = hasImage 
       ? "You are Aura, a helpful AI vision assistant by Synapse AI. You MUST look at the image carefully and describe/analyze/solve whatever is shown. If it is a math or science problem, solve it step by step. Always respond as if you can clearly see the image."
       : (persona || AURA_SYSTEM_PROMPT);
