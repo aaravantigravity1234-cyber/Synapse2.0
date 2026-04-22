@@ -1,0 +1,3 @@
+## 2024-04-22 - Missing ARIA Labels on Icon-Only Buttons
+**Learning:** This app heavily relies on icon-only buttons (like delete history, scroll to bottom, file attachment, stop generation, send message, and modal close buttons) without providing descriptive `aria-label` attributes. This pattern renders many core interactions inaccessible to screen reader users, who will just hear "button" without knowing its function.
+**Action:** Always verify that icon-only buttons are given clear, descriptive `aria-label` attributes to ensure keyboard and screen reader accessibility. Check both the main UI and modals/overlays for these issues.
