@@ -18,6 +18,30 @@ admin.initializeApp({
 
 // ── API Clients are now initialized dynamically per request ──
 
+
+// ── Dynamic Firebase Config ──
+app.get("/js/firebase-config.js", (req, res) => {
+  res.type("application/javascript");
+  res.send(`
+// ============================================
+// Synapse AI — Firebase Configuration (Dynamic)
+// ============================================
+const firebaseConfig = {
+  apiKey: "${process.env.FIREBASE_API_KEY || ''}",
+  authDomain: "${process.env.FIREBASE_AUTH_DOMAIN || ''}",
+  projectId: "${process.env.FIREBASE_PROJECT_ID || ''}",
+  storageBucket: "${process.env.FIREBASE_STORAGE_BUCKET || ''}",
+  messagingSenderId: "${process.env.FIREBASE_MESSAGING_SENDER_ID || ''}",
+  appId: "${process.env.FIREBASE_APP_ID || ''}",
+  measurementId: "${process.env.FIREBASE_MEASUREMENT_ID || ''}"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  `);
+});
+
 // ── Middleware ──
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
