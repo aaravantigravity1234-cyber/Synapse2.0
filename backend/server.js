@@ -11,6 +11,10 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust the first proxy in front of the app (e.g. Nginx, ALB)
+// This is required to correctly parse req.ip when behind a proxy.
+app.set('trust proxy', 1);
+
 // ── Firebase Admin SDK Init ──
 admin.initializeApp({
   projectId: process.env.FIREBASE_PROJECT_ID,
@@ -30,7 +34,7 @@ const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 20; // 20 requests per minute per user
 
 function rateLimit(req, res, next) {
-  const userId = req.user?.uid || req.ip;
+  const userId = req.user?.uid ? `user:${req.user.uid}` : `ip:${req.ip}`;
   const now = Date.now();
   
   if (!rateLimitMap.has(userId)) {
