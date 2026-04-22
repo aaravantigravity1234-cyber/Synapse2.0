@@ -1699,16 +1699,31 @@ if (window.visualViewport) {
   const chatFooter = document.getElementById("chat-footer");
   const footerGradient = document.querySelector(".footer-gradient");
   
-  window.visualViewport.addEventListener("resize", () => {
+  const updateFooterPosition = () => {
     if (!chatFooter) return;
     const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    if (offsetBottom > 50) {
+
+    // Only adjust footer if an input is actually focused
+    const isInputFocused = document.activeElement &&
+      (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA");
+
+    if (offsetBottom > 50 && isInputFocused) {
       // Keyboard is open
       chatFooter.style.bottom = offsetBottom + "px";
       if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
     } else {
       chatFooter.style.bottom = "0px";
       if (footerGradient) footerGradient.style.bottom = "0px";
+    }
+  };
+
+  window.visualViewport.addEventListener("resize", updateFooterPosition);
+  window.visualViewport.addEventListener("scroll", updateFooterPosition);
+
+  // Ensure footer resets when keyboard is explicitly dismissed
+  document.addEventListener("focusout", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+       setTimeout(updateFooterPosition, 100);
     }
   });
 }
