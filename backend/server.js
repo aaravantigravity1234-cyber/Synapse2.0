@@ -9,6 +9,7 @@ const admin = require("firebase-admin");
 const path = require("path");
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // ── Firebase Admin SDK Init ──
@@ -30,21 +31,23 @@ const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 20; // 20 requests per minute per user
 
 function rateLimit(req, res, next) {
-  const userId = req.user?.uid || req.ip;
+  const userId = req.user?.uid ? 'user:' + req.user.uid : 'ip:' + req.ip;
   const now = Date.now();
   
   if (!rateLimitMap.has(userId)) {
     rateLimitMap.set(userId, []);
   }
   
-  const timestamps = rateLimitMap.get(userId).filter(t => now - t < RATE_LIMIT_WINDOW);
+  const timestamps = rateLimitMap.get(userId);
+  while (timestamps.length > 0 && now - timestamps[0] > RATE_LIMIT_WINDOW) {
+    timestamps.shift();
+  }
   
   if (timestamps.length >= RATE_LIMIT_MAX) {
     return res.status(429).json({ error: "Too many requests. Please slow down." });
   }
   
   timestamps.push(now);
-  rateLimitMap.set(userId, timestamps);
   next();
 }
 
@@ -52,11 +55,11 @@ function rateLimit(req, res, next) {
 setInterval(() => {
   const now = Date.now();
   for (const [key, timestamps] of rateLimitMap.entries()) {
-    const valid = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-    if (valid.length === 0) {
+    while (timestamps.length > 0 && now - timestamps[0] > RATE_LIMIT_WINDOW) {
+      timestamps.shift();
+    }
+    if (timestamps.length === 0) {
       rateLimitMap.delete(key);
-    } else {
-      rateLimitMap.set(key, valid);
     }
   }
 }, 5 * 60 * 1000);
