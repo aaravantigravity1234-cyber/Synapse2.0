@@ -37,14 +37,18 @@ function rateLimit(req, res, next) {
     rateLimitMap.set(userId, []);
   }
   
-  const timestamps = rateLimitMap.get(userId).filter(t => now - t < RATE_LIMIT_WINDOW);
+  const timestamps = rateLimitMap.get(userId);
+
+  // ⚡ Bolt Performance Improvement: Use in-place shift() instead of .filter() to reduce GC pressure
+  while (timestamps.length > 0 && now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+    timestamps.shift();
+  }
   
   if (timestamps.length >= RATE_LIMIT_MAX) {
     return res.status(429).json({ error: "Too many requests. Please slow down." });
   }
   
   timestamps.push(now);
-  rateLimitMap.set(userId, timestamps);
   next();
 }
 
@@ -52,11 +56,13 @@ function rateLimit(req, res, next) {
 setInterval(() => {
   const now = Date.now();
   for (const [key, timestamps] of rateLimitMap.entries()) {
-    const valid = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-    if (valid.length === 0) {
+    // ⚡ Bolt Performance Improvement: Use in-place shift() instead of .filter() to reduce GC pressure
+    while (timestamps.length > 0 && now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+      timestamps.shift();
+    }
+
+    if (timestamps.length === 0) {
       rateLimitMap.delete(key);
-    } else {
-      rateLimitMap.set(key, valid);
     }
   }
 }, 5 * 60 * 1000);

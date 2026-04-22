@@ -1,0 +1,3 @@
+## 2024-04-22 - [In-place array pruning for rate limiting]
+**Learning:** Using `shift()` on arrays of monotonically increasing timestamps for sliding window rate limiting is far more efficient than `filter()`. In high-throughput applications, repeatedly calling `filter()` creates new array objects, inducing significant GC overhead. Using `shift()` to discard elements from the start of the array modifies it in place and operates very efficiently because we only examine elements until we hit the time window.
+**Action:** When implementing sliding-window logic or similar structures containing time-series data, consider if in-place mutation (e.g. `shift()` or pointer-based circular buffers) is possible instead of generating new arrays with `filter()`.
