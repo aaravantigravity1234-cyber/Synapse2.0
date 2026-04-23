@@ -1,0 +1,3 @@
+## 2024-05-24 - Missing Accessible Names on Icon-Only Buttons
+**Learning:** This application heavily relies on Google Material Symbols via `<span class="material-symbols-outlined">` for iconography, especially in icon-only buttons (like the `close` buttons, `drawer-toggle` labels, `send-btn`, etc.). Because these elements solely use span text for the icon render rather than descriptive text (e.g. `<span>close</span>`), screen readers read out the icon name ("close") or sometimes nothing meaningful depending on implementation, rather than the action.
+**Action:** Always ensure that whenever an interactive element (button, label acting as a button) only contains a Material Symbols icon, an explicit `aria-label` attribute is added describing the action.
