@@ -1,0 +1,3 @@
+## 2025-02-23 - [Rate Limiter] Reduce GC Pressure by Avoiding .filter()
+**Learning:** In high-frequency functions like rate limiters, using `.filter()` to prune old timestamps creates a new array allocation on every request. Under heavy load, this puts significant pressure on the Garbage Collector (GC), potentially causing latency spikes.
+**Action:** Use in-place array mutation (like `.shift()` in a `while` loop, since timestamps are inherently ordered chronologically) to prune elements, avoiding unnecessary array creations.

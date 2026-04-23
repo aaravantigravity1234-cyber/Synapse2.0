@@ -29,6 +29,9 @@ const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 20; // 20 requests per minute per user
 
+// ⚡ Bolt: Use in-place array mutation (.shift()) instead of .filter()
+// Why: `.filter()` creates a new array on every request, putting pressure on the Garbage Collector under heavy load.
+// Impact: Reduced GC pauses and lower memory overhead per request.
 function rateLimit(req, res, next) {
   const userId = req.user?.uid || req.ip;
   const now = Date.now();
@@ -37,14 +40,18 @@ function rateLimit(req, res, next) {
     rateLimitMap.set(userId, []);
   }
   
-  const timestamps = rateLimitMap.get(userId).filter(t => now - t < RATE_LIMIT_WINDOW);
+  const timestamps = rateLimitMap.get(userId);
+
+  // Prune old timestamps in-place
+  while (timestamps.length > 0 && now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+    timestamps.shift();
+  }
   
   if (timestamps.length >= RATE_LIMIT_MAX) {
     return res.status(429).json({ error: "Too many requests. Please slow down." });
   }
   
   timestamps.push(now);
-  rateLimitMap.set(userId, timestamps);
   next();
 }
 
@@ -52,11 +59,13 @@ function rateLimit(req, res, next) {
 setInterval(() => {
   const now = Date.now();
   for (const [key, timestamps] of rateLimitMap.entries()) {
-    const valid = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-    if (valid.length === 0) {
+    // Prune old timestamps in-place
+    while (timestamps.length > 0 && now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+      timestamps.shift();
+    }
+
+    if (timestamps.length === 0) {
       rateLimitMap.delete(key);
-    } else {
-      rateLimitMap.set(key, valid);
     }
   }
 }, 5 * 60 * 1000);
