@@ -127,7 +127,7 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
 
   if (!activeApiKey) {
     console.error(`[ERROR] Missing API Key for model: ${targetModel}`);
-    return res.status(400).json({ error: "Missing API Key for the selected model. Please configure your .env file." });
+    return res.status(400).json({ error: "Service unavailable at this time. Please contact support." });
   }
 
   const activeAiClient = new OpenAI({
@@ -229,16 +229,16 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
       if (err.status === 404 || realError.includes("not found") || realError.includes("404")) {
         errorMsg = "Vision model not available on this API account. Contact support.";
       } else if (err.status === 400) {
-        errorMsg = `Image rejected by API: ${realError}`;
+        errorMsg = "Image rejected by API.";
       } else if (err.status === 401) {
-        errorMsg = "Invalid Vision API Key.";
+        errorMsg = "Service authentication failed. Please try again later.";
       } else {
-        errorMsg = `Image analysis failed: ${realError}`;
+        errorMsg = "Image analysis failed.";
       }
     } else if (err.status === 429) {
       errorMsg = "Rate limit exceeded. Please wait a moment.";
     } else if (err.status === 401) {
-      errorMsg = "Invalid API Key. Please check your credentials.";
+      errorMsg = "Service authentication failed. Please try again later.";
     }
     
     if (res.headersSent) {
