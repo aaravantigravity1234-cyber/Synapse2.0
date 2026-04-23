@@ -1817,3 +1817,84 @@ html:not(.dark) #suggestion-chips-container button:hover {
   border-color: rgba(0, 105, 112, 0.2);
   color: #006970;
 }
+
+/* Custom Input Field Focus Animation */
+#text-input-bar {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+#text-input-bar:focus-within {
+  box-shadow: 0 12px 48px rgba(0, 219, 233, 0.4);
+  border-color: rgba(0, 219, 233, 0.6);
+  transform: translateY(-2px);
+}
+
+.chat-input-field:focus {
+  outline: none;
+}
+
+/* Make icons more interactive */
+.material-symbols-outlined {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+button:hover > .material-symbols-outlined {
+  transform: scale(1.15);
+}
+button:active > .material-symbols-outlined {
+  transform: scale(0.9);
+}
+
+/* User Message Bubble Refinement */
+.user-bubble {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.user-bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 219, 233, 0.15);
+}
+
+/* Message rows smooth slide in */
+.message-row {
+  animation: message-in-spring 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes message-in-spring {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Scroll to bottom button nice glow */
+#scroll-to-bottom-btn {
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+#scroll-to-bottom-btn:not(.opacity-0) {
+  box-shadow: 0 4px 20px rgba(0, 219, 233, 0.3);
+}
+#scroll-to-bottom-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(0, 219, 233, 0.5);
+}
+
+
+/* Better Scrollbar for Webkit Browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(30, 31, 37, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 219, 233, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 219, 233, 0.5);
+}

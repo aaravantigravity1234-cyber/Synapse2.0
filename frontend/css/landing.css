@@ -618,3 +618,78 @@ button:focus-visible, a:focus-visible {
 .feature-card:hover .hover-icon-spin {
   transform: rotate(15deg) scale(1.15);
 }
+
+/* Enhancing Landing Page Animations and Interaction */
+.glass-btn, .glass-btn-heavy {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.feature-card {
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-glow);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.model-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-secondary);
+}
+
+/* Make nav more floating */
+.navbar {
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+}
+.navbar:hover {
+  background: rgba(30, 31, 37, 0.7);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Better glowing text */
+.text-glow {
+  text-shadow: 0 0 20px rgba(0, 219, 233, 0.5);
+}
+
+
+/* Enhancing CTA pulse animation */
+@keyframes cta-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+  50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(99, 102, 241, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+}
+
+.glass-btn-heavy {
+  animation: cta-pulse 3s infinite ease-in-out;
+}
+
+/* Enhancing hero entry animations */
+.hero-title {
+  animation: fadeUp 1s ease-out forwards;
+}
+
+.hero-subtitle {
+  animation: fadeUp 1s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.hero-actions {
+  animation: fadeUp 1s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Subtle hover interaction for the aura orb */
+.aura-orb-container {
+  transition: transform 0.3s ease-out;
+}
+.aura-orb-container:hover {
+  transform: scale(1.05) translateY(-5px);
+}
