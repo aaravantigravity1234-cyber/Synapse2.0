@@ -1,0 +1,3 @@
+## 2024-04-24 - Rate Limiter Array Pruning Optimization
+**Learning:** Using `.filter()` on arrays in high-frequency middleware like rate limiters creates new array instances on every request, leading to increased Garbage Collection (GC) pressure. For time-series data like timestamps, where oldest entries are always at the beginning, an in-place `while` loop using `.shift()` is much more memory efficient.
+**Action:** When managing chronologically ordered arrays for things like rate limits or sliding windows, prefer in-place mutations (like `.shift()`) over operations that return new arrays (like `.filter()`) to minimize GC overhead.
