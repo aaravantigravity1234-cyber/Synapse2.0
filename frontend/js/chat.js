@@ -737,7 +737,7 @@ function loadHistoryIndex() {
     item.className = "history-item";
     
     // Date formatting — relative time
-    const date = formatRelativeTime(chat.updatedAt);
+    const date = window.formatRelativeTime(chat.updatedAt);
     
     item.innerHTML = `
       <div class="flex-1 overflow-hidden" onclick="loadSession('${chat.id}')">
@@ -1679,7 +1679,7 @@ function copyCode(btn) {
 window.copyCode = copyCode;
 
 // ── Relative Time Formatter ──
-function formatRelativeTime(timestamp) {
+window.formatRelativeTime = function(timestamp) {
   const now = Date.now();
   const diff = now - timestamp;
   const mins = Math.floor(diff / 60000);
