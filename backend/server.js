@@ -33,18 +33,23 @@ function rateLimit(req, res, next) {
   const userId = req.user?.uid || req.ip;
   const now = Date.now();
   
-  if (!rateLimitMap.has(userId)) {
-    rateLimitMap.set(userId, []);
+  let timestamps = rateLimitMap.get(userId);
+  if (!timestamps) {
+    timestamps = [];
+    rateLimitMap.set(userId, timestamps);
   }
   
-  const timestamps = rateLimitMap.get(userId).filter(t => now - t < RATE_LIMIT_WINDOW);
+  // ⚡ Bolt: Use in-place shift() to prune old timestamps instead of allocating a new array with .filter()
+  // This reduces GC pressure significantly under high request volume
+  while (timestamps.length > 0 && now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+    timestamps.shift();
+  }
   
   if (timestamps.length >= RATE_LIMIT_MAX) {
     return res.status(429).json({ error: "Too many requests. Please slow down." });
   }
   
   timestamps.push(now);
-  rateLimitMap.set(userId, timestamps);
   next();
 }
 
@@ -52,11 +57,13 @@ function rateLimit(req, res, next) {
 setInterval(() => {
   const now = Date.now();
   for (const [key, timestamps] of rateLimitMap.entries()) {
-    const valid = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-    if (valid.length === 0) {
+    // ⚡ Bolt: Use in-place shift() to prune old timestamps instead of allocating a new array with .filter()
+    while (timestamps.length > 0 && now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+      timestamps.shift();
+    }
+
+    if (timestamps.length === 0) {
       rateLimitMap.delete(key);
-    } else {
-      rateLimitMap.set(key, valid);
     }
   }
 }, 5 * 60 * 1000);
