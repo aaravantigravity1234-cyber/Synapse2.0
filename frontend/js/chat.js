@@ -1604,9 +1604,16 @@ function renderMarkdown(text, isStreaming = false) {
   // Blockquotes
   html = html.replace(/^&gt;\s?(.+)$/gm, "<blockquote>$1</blockquote>");
   // Images (must come before links so ![alt](url) isn't consumed by [alt](url))
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full rounded-lg my-2 shadow-lg border border-outline-variant/30" />');
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
+    const safeUrl = escapeAttribute(sanitizeUrl(unescapeHtml(url)));
+    const safeAlt = escapeAttribute(alt);
+    return `<img src="${safeUrl}" alt="${safeAlt}" class="max-w-full rounded-lg my-2 shadow-lg border border-outline-variant/30" />`;
+  });
   // Links
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    const safeUrl = escapeAttribute(sanitizeUrl(unescapeHtml(url)));
+    return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  });
 
   // Paragraphs and Newlines
   html = html.replace(/\n\n/g, "</p><p>");
@@ -1643,6 +1650,40 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function unescapeHtml(html) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
+
+function escapeAttribute(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function sanitizeUrl(url) {
+  // Remove control characters and whitespace from the URL before checking
+  let cleanedUrl = url.replace(/[\u0000-\u001F\u007F-\u009F\s]+/g, '').trim();
+  if (!cleanedUrl) return "#";
+  try {
+    const parsed = new URL(cleanedUrl, "http://dummy");
+    if (["javascript:", "data:", "vbscript:"].includes(parsed.protocol)) {
+      return "#";
+    }
+    return url.trim(); // Return original trimmed url if safe, to preserve valid formatting
+  } catch (e) {
+    const normalized = cleanedUrl.toLowerCase();
+    if (normalized.startsWith("javascript:") || normalized.startsWith("data:") || normalized.startsWith("vbscript:")) {
+      return "#";
+    }
+    return url.trim();
+  }
 }
 
 // ── Copy Code to Clipboard ──
