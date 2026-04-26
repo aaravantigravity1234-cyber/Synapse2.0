@@ -777,7 +777,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else {
         attachmentPreviews.push(`<span style="color:#00dbe9;font-size:0.8rem; display: block;">📎 Attached: ${escapeHtml(file.filename)}</span>`);
       }
@@ -1604,9 +1604,13 @@ function renderMarkdown(text, isStreaming = false) {
   // Blockquotes
   html = html.replace(/^&gt;\s?(.+)$/gm, "<blockquote>$1</blockquote>");
   // Images (must come before links so ![alt](url) isn't consumed by [alt](url))
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full rounded-lg my-2 shadow-lg border border-outline-variant/30" />');
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+    return `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(alt)}" class="max-w-full rounded-lg my-2 shadow-lg border border-outline-variant/30" />`;
+  });
   // Links
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+    return `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  });
 
   // Paragraphs and Newlines
   html = html.replace(/\n\n/g, "</p><p>");
@@ -1643,6 +1647,10 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function escapeAttribute(text) {
+  return escapeHtml(text).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 // ── Copy Code to Clipboard ──
