@@ -1,0 +1,3 @@
+## 2024-05-18 - [In-place array pruning for time-series rate limits]
+**Learning:** Using `.filter()` to prune old timestamps in high-frequency functions (like API rate limiting or periodic cleanups) allocates a new array every time. In Node.js, this creates unnecessary garbage collection (GC) pressure which can degrade performance under heavy load.
+**Action:** Use an in-place `while` loop with `.shift()` to prune older timestamps from arrays. This updates the array in place, avoiding memory reallocation overhead, keeping memory usage stable, and reducing GC pauses.
