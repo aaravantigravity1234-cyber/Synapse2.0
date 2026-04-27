@@ -1,0 +1,4 @@
+## 2024-04-27 - XSS via unescaped quotes in `escapeHtml` used in HTML attributes
+**Vulnerability:** Cross-Site Scripting (XSS) vulnerability found in file attachments where `escapeHtml(file.filename)` was used to safely insert the filename into an HTML `alt` attribute. The default `escapeHtml` implementation in this codebase did not escape double or single quotes.
+**Learning:** Using an `escapeHtml` function that doesn't escape quotes (`"` or `'`) inside HTML attributes allows attackers to break out of the attribute and inject arbitrary scripts (e.g., `onload="alert(1)"`).
+**Prevention:** Always use a dedicated `escapeAttribute` function (or similar) that escapes `<`, `>`, `&`, `"`, and `'` when injecting untrusted data into HTML attributes, to prevent breaking out of the attribute context.
