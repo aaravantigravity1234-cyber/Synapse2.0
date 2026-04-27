@@ -1,0 +1,3 @@
+## 2024-04-27 - [Optimize rate limiter array pruning to reduce GC pressure]
+**Learning:** `Array.prototype.filter()` allocates a new array each time it's called. In high-frequency operations like rate limiting middleware or recurring cleanup intervals, constantly allocating new arrays creates unnecessary Garbage Collection (GC) pressure. Since the rate limit timestamps are pushed sequentially and naturally sorted, we can prune expired timestamps efficiently by using an in-place `while` loop with `.shift()`.
+**Action:** When working with chronologically sorted arrays in middleware or high-frequency loops, prefer in-place mutation (like `shift()` or `splice()`) from the head over returning new arrays with `filter()` to minimize GC pressure.
