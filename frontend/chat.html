@@ -187,7 +187,7 @@
     <div class="flex items-center gap-2">
 
       <!-- Delete All History -->
-      <button id="delete-all-history-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors active:scale-95 duration-200 text-[#dbfcff] hover:text-[#ffb4ab]" title="Delete All History">
+      <button id="delete-all-history-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors active:scale-95 duration-200 text-[#dbfcff] hover:text-[#ffb4ab]" title="Delete All History" aria-label="Delete all history">
         <span class="material-symbols-outlined">delete_sweep</span>
       </button>
     </div>
@@ -235,7 +235,7 @@
     <div id="chat-messages" class="chat-messages w-full flex-1"></div>
 
     <!-- Scroll to bottom button -->
-    <button id="scroll-to-bottom-btn" class="fixed bottom-32 right-4 md:right-8 w-11 h-11 rounded-full flex items-center justify-center z-40 transition-all opacity-0 pointer-events-none shadow-lg active:scale-90" style="background:rgba(30,31,37,0.9); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.1); color:#e2e2e9;">
+    <button id="scroll-to-bottom-btn" class="fixed bottom-32 right-4 md:right-8 w-11 h-11 rounded-full flex items-center justify-center z-40 transition-all opacity-0 pointer-events-none shadow-lg active:scale-90" style="background:rgba(30,31,37,0.9); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.1); color:#e2e2e9;" aria-label="Scroll to bottom">
       <span class="material-symbols-outlined" style="font-size:20px;">arrow_downward</span>
     </button>
   </main>
@@ -310,7 +310,7 @@
       <!-- Normal Text Input -->
       <div id="text-input-bar" class="glass-card border border-outline-variant/30 rounded-full p-2 flex items-center gap-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <input type="file" id="file-input" class="hidden" multiple accept=".txt,.json,.md,.csv,image/png,image/jpeg,image/webp,image/gif" />
-        <button id="attach-btn" class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:text-primary transition-colors">
+        <button id="attach-btn" class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:text-primary transition-colors" aria-label="Attach file">
           <span class="material-symbols-outlined">add</span>
         </button>
         <textarea
@@ -320,10 +320,10 @@
           rows="1"
           style="max-height: 120px;"
         ></textarea>
-        <button id="stop-btn" class="hidden w-10 h-10 flex items-center justify-center rounded-xl text-error hover:bg-error/10 transition-all active:scale-90" title="Stop generating">
+        <button id="stop-btn" class="hidden w-10 h-10 flex items-center justify-center rounded-xl text-error hover:bg-error/10 transition-all active:scale-90" title="Stop generating" aria-label="Stop generating">
           <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stop_circle</span>
         </button>
-        <button id="send-btn" class="bg-primary-container text-on-primary-fixed w-10 h-10 flex items-center justify-center rounded-full hover:shadow-[0_0_20px_rgba(0,219,233,0.3)] transition-all active:scale-90">
+        <button id="send-btn" class="bg-primary-container text-on-primary-fixed w-10 h-10 flex items-center justify-center rounded-full hover:shadow-[0_0_20px_rgba(0,219,233,0.3)] transition-all active:scale-90" aria-label="Send message">
           <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
         </button>
       </div>
