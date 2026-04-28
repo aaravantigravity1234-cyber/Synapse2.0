@@ -1,0 +1,4 @@
+## 2024-05-18 - Missing quote escaping in HTML attributes
+**Vulnerability:** XSS via unescaped quotes in HTML attributes injected with user input (specifically `alt` attribute for image filenames). The native `escapeHtml` escapes `<, >` and `&` but fails to escape quotes `"` and `'`.
+**Learning:** Standard `escapeHtml` functions sometimes do not escape quotes because they focus on protecting HTML text elements. When dynamically creating HTML strings where user input is placed inside an attribute (like `alt=""`), unescaped double quotes allow breaking out of the attribute and injecting arbitrary events (e.g. `onload=alert(1)`).
+**Prevention:** Always use a specific `escapeAttribute` function that escapes both double `"` and single `'` quotes (to `&quot;` and `&#039;`) when placing user input inside HTML attributes, or avoid string interpolation for building DOM elements in favor of `element.setAttribute()`.
