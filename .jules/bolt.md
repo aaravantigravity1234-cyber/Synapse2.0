@@ -1,0 +1,3 @@
+## 2024-04-28 - Throttling High-Frequency Layout Triggers
+**Learning:** Reading layout-triggering properties like `document.documentElement.scrollHeight` or `offsetHeight` inside high-frequency event handlers (like `scroll` or `resize`) forces the browser to perform synchronous layout recalculations (layout thrashing) on every event execution, causing main thread blocking and jank.
+**Action:** Always wrap layout-reading and DOM-mutating logic within high-frequency event handlers inside a `window.requestAnimationFrame()` callback combined with a `ticking` boolean flag. This throttles the execution to the display's native refresh rate (typically 60fps), avoiding unnecessary recalcs between frames while maintaining visual responsiveness.

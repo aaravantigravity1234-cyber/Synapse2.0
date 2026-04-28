@@ -926,21 +926,30 @@ function updateScrollBtn() {
 // ── Scroll To Bottom ──
 let userHasScrolledUp = false;
 let lastScrollY = window.scrollY || 0;
+let scrollTicking = false;
 
 window.addEventListener("scroll", () => {
-  const currentScrollY = window.scrollY;
-  const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
-  
-  if (currentScrollY < lastScrollY) {
-    if (distFromBottom > 200) {
-      userHasScrolledUp = true;
-    }
-  } else if (distFromBottom <= 200) {
-    userHasScrolledUp = false;
+  if (!scrollTicking) {
+    window.requestAnimationFrame(() => {
+      const currentScrollY = window.scrollY;
+      // Reading scrollHeight forces synchronous layout recalculation;
+      // throttling with requestAnimationFrame prevents layout thrashing
+      const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
+
+      if (currentScrollY < lastScrollY) {
+        if (distFromBottom > 200) {
+          userHasScrolledUp = true;
+        }
+      } else if (distFromBottom <= 200) {
+        userHasScrolledUp = false;
+      }
+
+      lastScrollY = currentScrollY;
+      updateScrollBtn();
+      scrollTicking = false;
+    });
+    scrollTicking = true;
   }
-  
-  lastScrollY = currentScrollY;
-  updateScrollBtn();
 }, { passive: true });
 
 if (scrollToBottomBtn) {
