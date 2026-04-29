@@ -121,7 +121,7 @@ auth.onAuthStateChanged((user) => {
   if (userNameEl) userNameEl.textContent = user.displayName || user.email?.split("@")[0] || "User";
   if (userAvatarEl) {
     if (user.photoURL) {
-      userAvatarEl.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      userAvatarEl.innerHTML = `<img src="${escapeAttribute(user.photoURL)}" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
     } else {
       const initial = (user.displayName || user.email || "U")[0].toUpperCase();
       userAvatarEl.innerHTML = `<span style="font-size:16px;font-weight:700;color:#00dbe9;">${initial}</span>`;
@@ -739,15 +739,38 @@ function loadHistoryIndex() {
     // Date formatting — relative time
     const date = formatRelativeTime(chat.updatedAt);
     
-    item.innerHTML = `
-      <div class="flex-1 overflow-hidden" onclick="loadSession('${chat.id}')">
-        <p class="text-on-surface font-bold text-sm truncate">${escapeHtml(chat.title)}</p>
-        <p class="text-on-surface-variant text-xs">${date}</p>
-      </div>
-      <button onclick="event.stopPropagation(); deleteSession('${chat.id}')" class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors">
-        <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
-      </button>
-    `;
+    const textDiv = document.createElement("div");
+    textDiv.className = "flex-1 overflow-hidden";
+    textDiv.onclick = () => loadSession(chat.id);
+
+    const titleP = document.createElement("p");
+    titleP.className = "text-on-surface font-bold text-sm truncate";
+    titleP.textContent = chat.title;
+
+    const dateP = document.createElement("p");
+    dateP.className = "text-on-surface-variant text-xs";
+    dateP.textContent = date;
+
+    textDiv.appendChild(titleP);
+    textDiv.appendChild(dateP);
+
+    const btn = document.createElement("button");
+    btn.className = "w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors";
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      deleteSession(chat.id);
+    };
+
+    const span = document.createElement("span");
+    span.className = "material-symbols-outlined";
+    span.style.fontSize = "18px";
+    span.textContent = "delete";
+
+    btn.appendChild(span);
+
+    item.appendChild(textDiv);
+    item.appendChild(btn);
+
     historyListContainer.appendChild(item);
   });
 }
@@ -777,7 +800,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else {
         attachmentPreviews.push(`<span style="color:#00dbe9;font-size:0.8rem; display: block;">📎 Attached: ${escapeHtml(file.filename)}</span>`);
       }
@@ -1328,7 +1351,7 @@ function appendMessage(role, content, explicitIndex = -1, isRawHtmlForUser = fal
   } else {
     const user = auth.currentUser;
     if (user?.photoURL) {
-      avatar.innerHTML = `<img src="${user.photoURL}" alt="You">`;
+      avatar.innerHTML = `<img src="${escapeAttribute(user.photoURL)}" alt="You">`;
     } else {
       const initial = (user?.displayName || user?.email || "U")[0].toUpperCase();
       avatar.textContent = initial;
@@ -1586,7 +1609,7 @@ function renderMarkdown(text, isStreaming = false) {
     }
 
     // Standard code block for other languages
-    return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang-label">${langLabel}</span><div style="display:flex;"><button class="copy-code-btn" onclick="copyCode(this)"><span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> Copy</button></div></div><pre><code class="language-${block.lang}">${escapedCodeForDisplay}</code></pre></div>`;
+    return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang-label">${langLabel}</span><div style="display:flex;"><button class="copy-code-btn" onclick="copyCode(this)"><span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> Copy</button></div></div><pre><code class="language-${escapeAttribute(block.lang)}">${escapedCodeForDisplay}</code></pre></div>`;
   });
 
   // Inline code
@@ -1643,6 +1666,16 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function escapeAttribute(text) {
+  if (typeof text !== "string") return String(text ?? "");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // ── Copy Code to Clipboard ──
