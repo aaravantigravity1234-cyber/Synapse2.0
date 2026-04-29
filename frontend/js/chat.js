@@ -1165,8 +1165,17 @@ async function generateContextualSuggestions() {
     if (!user) return;
     const idToken = await user.getIdToken();
 
-    // Take last 3 messages for context
-    const context = conversationHistory.slice(-3);
+    // Take last 3 messages for context, removing image objects to avoid routing to the Vision model
+    const context = conversationHistory.slice(-3).map(msg => {
+      if (Array.isArray(msg.content)) {
+        const textParts = msg.content
+          .filter(c => c.type === "text")
+          .map(c => c.text)
+          .join("\n");
+        return { ...msg, content: textParts || "[Image Attachment]" };
+      }
+      return msg;
+    });
     
     const response = await fetch("/api/chat", {
       method: "POST",
