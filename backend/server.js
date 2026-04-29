@@ -11,6 +11,8 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set("trust proxy", 1);
+
 // ── Firebase Admin SDK Init ──
 admin.initializeApp({
   projectId: process.env.FIREBASE_PROJECT_ID,
