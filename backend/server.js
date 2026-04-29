@@ -33,13 +33,31 @@ function rateLimit(req, res, next) {
   const userId = req.user?.uid || req.ip;
   const now = Date.now();
   
-  if (!rateLimitMap.has(userId)) {
-    rateLimitMap.set(userId, []);
+  let timestamps = rateLimitMap.get(userId);
+
+  if (!timestamps) {
+    rateLimitMap.set(userId, [now]);
+    return next();
   }
   
-  const timestamps = rateLimitMap.get(userId).filter(t => now - t < RATE_LIMIT_WINDOW);
+  // Optimization: If the oldest timestamp is within the window, all are.
+  if (now - timestamps[0] >= RATE_LIMIT_WINDOW) {
+    // Some timestamps have expired. Find the first valid one.
+    let firstValidIndex = 1;
+    while (firstValidIndex < timestamps.length && now - timestamps[firstValidIndex] >= RATE_LIMIT_WINDOW) {
+      firstValidIndex++;
+    }
+
+    if (firstValidIndex === timestamps.length) {
+      timestamps = [];
+    } else {
+      timestamps = timestamps.slice(firstValidIndex);
+    }
+  }
   
   if (timestamps.length >= RATE_LIMIT_MAX) {
+    // Update map with potentially filtered array before returning error
+    rateLimitMap.set(userId, timestamps);
     return res.status(429).json({ error: "Too many requests. Please slow down." });
   }
   
@@ -52,11 +70,26 @@ function rateLimit(req, res, next) {
 setInterval(() => {
   const now = Date.now();
   for (const [key, timestamps] of rateLimitMap.entries()) {
-    const valid = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-    if (valid.length === 0) {
+    // Optimization: if oldest is still valid, the whole array is valid
+    if (now - timestamps[0] < RATE_LIMIT_WINDOW) continue;
+
+    // Optimization: if newest is expired, the whole array is expired
+    if (now - timestamps[timestamps.length - 1] >= RATE_LIMIT_WINDOW) {
+      rateLimitMap.delete(key);
+      continue;
+    }
+
+    // Otherwise, some are expired and some are valid.
+    // Since max size is small (20), a simple loop to find the first valid index is efficient.
+    let firstValidIndex = 1;
+    while (firstValidIndex < timestamps.length && now - timestamps[firstValidIndex] >= RATE_LIMIT_WINDOW) {
+      firstValidIndex++;
+    }
+
+    if (firstValidIndex === timestamps.length) {
       rateLimitMap.delete(key);
     } else {
-      rateLimitMap.set(key, valid);
+      rateLimitMap.set(key, timestamps.slice(firstValidIndex));
     }
   }
 }, 5 * 60 * 1000);
