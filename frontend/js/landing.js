@@ -2,17 +2,6 @@
 // Synapse AI — Landing Page Logic
 // ============================================
 
-// ── Page Transition Helper ──
-function landingNavigateTo(url) {
-  const overlay = document.getElementById('page-overlay');
-  if (overlay) {
-    overlay.classList.add('active');
-    setTimeout(() => { window.location.href = url; }, 300);
-  } else {
-    window.location.href = url;
-  }
-}
-
 // Wire up all navigation links for smooth transitions
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('a[href^="/"]').forEach(link => {
@@ -22,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (href === '/login.html') {
         e.preventDefault();
         if (typeof auth !== 'undefined' && auth.currentUser) {
-          landingNavigateTo('/chat.html');
+          navigateTo('/chat.html');
         } else {
           openAuthModal();
         }
@@ -30,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (href && !href.startsWith('#')) {
         e.preventDefault();
-        landingNavigateTo(href);
+        navigateTo(href);
       }
     });
   });
