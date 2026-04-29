@@ -133,8 +133,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Scroll Indicator ──
   const scrollIndicator = document.getElementById('scroll-indicator');
   if (scrollIndicator) {
+    let landingScrollTicking = false;
     window.addEventListener('scroll', () => {
-      scrollIndicator.style.opacity = window.scrollY > 80 ? '0' : '1';
+      // Throttled with requestAnimationFrame to prevent layout thrashing
+      // when updating scrollIndicator opacity during high-frequency scroll events
+      if (!landingScrollTicking) {
+        window.requestAnimationFrame(() => {
+          scrollIndicator.style.opacity = window.scrollY > 80 ? '0' : '1';
+          landingScrollTicking = false;
+        });
+        landingScrollTicking = true;
+      }
     }, { passive: true });
   }
 
@@ -152,13 +161,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Parallax Orb on Mouse Move ──
+let orbTicking = false;
 document.addEventListener('mousemove', (e) => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const orbContainer = document.querySelector('.aura-orb-container');
   if (!orbContainer) return;
-  const mouseX = e.clientX / window.innerWidth - 0.5;
-  const mouseY = e.clientY / window.innerHeight - 0.5;
-  orbContainer.style.transform = `translate(${mouseX * 30}px, ${mouseY * 30}px)`;
+
+  // Throttled with requestAnimationFrame to prevent layout thrashing
+  // when reading e.clientX/Y and updating DOM transforms during rapid mouse movements
+  if (!orbTicking) {
+    window.requestAnimationFrame(() => {
+      const mouseX = e.clientX / window.innerWidth - 0.5;
+      const mouseY = e.clientY / window.innerHeight - 0.5;
+      orbContainer.style.transform = `translate(${mouseX * 30}px, ${mouseY * 30}px)`;
+      orbTicking = false;
+    });
+    orbTicking = true;
+  }
 });
 
 console.log('Synapse AI Landing Page Online.');

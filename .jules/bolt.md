@@ -1,0 +1,3 @@
+## 2024-05-24 - Throttling High-Frequency Layout Property Reads
+**Learning:** High-frequency events (like `scroll` and `mousemove`) that read layout-triggering properties (e.g., `document.documentElement.scrollHeight` or `window.scrollY`) can cause severe layout thrashing and block the main thread, especially on less powerful devices.
+**Action:** Always wrap event handlers for `scroll`, `resize`, or `mousemove` in a `window.requestAnimationFrame()` callback with a ticking flag (e.g., `isTicking`) if they read layout properties or trigger visual updates, to decouple the high-frequency event from the browser's rendering cycle.
