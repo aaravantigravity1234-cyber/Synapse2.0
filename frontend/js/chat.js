@@ -973,21 +973,29 @@ function updateScrollBtn() {
 // ── Scroll To Bottom ──
 let userHasScrolledUp = false;
 let lastScrollY = window.scrollY || 0;
+let isScrolling = false;
 
 window.addEventListener("scroll", () => {
-  const currentScrollY = window.scrollY;
-  const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
-  
-  if (currentScrollY < lastScrollY) {
-    if (distFromBottom > 200) {
-      userHasScrolledUp = true;
-    }
-  } else if (distFromBottom <= 200) {
-    userHasScrolledUp = false;
+  // ⚡ Bolt: Throttling scroll event with requestAnimationFrame to prevent layout thrashing
+  if (!isScrolling) {
+    window.requestAnimationFrame(() => {
+      const currentScrollY = window.scrollY;
+      const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
+
+      if (currentScrollY < lastScrollY) {
+        if (distFromBottom > 200) {
+          userHasScrolledUp = true;
+        }
+      } else if (distFromBottom <= 200) {
+        userHasScrolledUp = false;
+      }
+
+      lastScrollY = currentScrollY;
+      updateScrollBtn();
+      isScrolling = false;
+    });
+    isScrolling = true;
   }
-  
-  lastScrollY = currentScrollY;
-  updateScrollBtn();
 }, { passive: true });
 
 if (scrollToBottomBtn) {
@@ -1674,17 +1682,28 @@ function formatRelativeTime(timestamp) {
 if (window.visualViewport) {
   const chatFooter = document.getElementById("chat-footer");
   const footerGradient = document.querySelector(".footer-gradient");
+  let isResizing = false;
   
   window.visualViewport.addEventListener("resize", () => {
-    if (!chatFooter) return;
-    const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    if (offsetBottom > 50) {
-      // Keyboard is open
-      chatFooter.style.bottom = offsetBottom + "px";
-      if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
-    } else {
-      chatFooter.style.bottom = "0px";
-      if (footerGradient) footerGradient.style.bottom = "0px";
+    // ⚡ Bolt: Throttling resize event with requestAnimationFrame to prevent layout thrashing
+    if (!isResizing) {
+      window.requestAnimationFrame(() => {
+        if (!chatFooter) {
+          isResizing = false;
+          return;
+        }
+        const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+        if (offsetBottom > 50) {
+          // Keyboard is open
+          chatFooter.style.bottom = offsetBottom + "px";
+          if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
+        } else {
+          chatFooter.style.bottom = "0px";
+          if (footerGradient) footerGradient.style.bottom = "0px";
+        }
+        isResizing = false;
+      });
+      isResizing = true;
     }
   });
 }
