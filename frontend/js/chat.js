@@ -769,14 +769,24 @@ function loadHistoryIndex() {
       item.className = "history-item";
       const date = formatRelativeTime(chat.updatedAt);
       item.innerHTML = `
-        <div class="flex-1 overflow-hidden" onclick="loadSession('${chat.id}')">
+        <div class="flex-1 overflow-hidden cursor-pointer">
           <p class="text-on-surface font-bold text-sm truncate">${escapeHtml(chat.title)}</p>
           <p class="text-on-surface-variant text-xs">${date}</p>
         </div>
-        <button onclick="event.stopPropagation(); deleteSession('${chat.id}')" class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
+        <button class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
           <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
         </button>
       `;
+
+      const sessionDiv = item.querySelector('.flex-1');
+      sessionDiv.addEventListener('click', () => loadSession(chat.id));
+
+      const deleteBtn = item.querySelector('button');
+      deleteBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        deleteSession(chat.id);
+      });
+
       historyListContainer.appendChild(item);
     });
   });
@@ -813,7 +823,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else {
         attachmentPreviews.push(`<span style="color:#00dbe9;font-size:0.8rem; display: block;">📎 Attached: ${escapeHtml(file.filename)}</span>`);
       }
@@ -1619,6 +1629,10 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function escapeAttribute(text) {
+  return escapeHtml(text).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 // ── Copy Code to Clipboard ──
