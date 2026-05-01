@@ -973,21 +973,28 @@ function updateScrollBtn() {
 // ── Scroll To Bottom ──
 let userHasScrolledUp = false;
 let lastScrollY = window.scrollY || 0;
+let isScrollTicking = false;
 
 window.addEventListener("scroll", () => {
-  const currentScrollY = window.scrollY;
-  const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
-  
-  if (currentScrollY < lastScrollY) {
-    if (distFromBottom > 200) {
-      userHasScrolledUp = true;
-    }
-  } else if (distFromBottom <= 200) {
-    userHasScrolledUp = false;
+  if (!isScrollTicking) {
+    window.requestAnimationFrame(() => {
+      const currentScrollY = window.scrollY;
+      const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
+
+      if (currentScrollY < lastScrollY) {
+        if (distFromBottom > 200) {
+          userHasScrolledUp = true;
+        }
+      } else if (distFromBottom <= 200) {
+        userHasScrolledUp = false;
+      }
+
+      lastScrollY = currentScrollY;
+      updateScrollBtn();
+      isScrollTicking = false;
+    });
+    isScrollTicking = true;
   }
-  
-  lastScrollY = currentScrollY;
-  updateScrollBtn();
 }, { passive: true });
 
 if (scrollToBottomBtn) {
@@ -1674,17 +1681,27 @@ function formatRelativeTime(timestamp) {
 if (window.visualViewport) {
   const chatFooter = document.getElementById("chat-footer");
   const footerGradient = document.querySelector(".footer-gradient");
+  let isResizeTicking = false;
   
   window.visualViewport.addEventListener("resize", () => {
-    if (!chatFooter) return;
-    const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    if (offsetBottom > 50) {
-      // Keyboard is open
-      chatFooter.style.bottom = offsetBottom + "px";
-      if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
-    } else {
-      chatFooter.style.bottom = "0px";
-      if (footerGradient) footerGradient.style.bottom = "0px";
+    if (!isResizeTicking) {
+      window.requestAnimationFrame(() => {
+        if (!chatFooter) {
+          isResizeTicking = false;
+          return;
+        }
+        const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+        if (offsetBottom > 50) {
+          // Keyboard is open
+          chatFooter.style.bottom = offsetBottom + "px";
+          if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
+        } else {
+          chatFooter.style.bottom = "0px";
+          if (footerGradient) footerGradient.style.bottom = "0px";
+        }
+        isResizeTicking = false;
+      });
+      isResizeTicking = true;
     }
   });
 }
