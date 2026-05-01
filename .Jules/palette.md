@@ -1,0 +1,3 @@
+## $(date +%Y-%m-%d) - Interactive Elements with tabindex="-1"
+**Learning:** Found a specific pattern where interactive icon buttons (like `#toggle-password` in the auth modal) were explicitly given `tabindex="-1"`, completely removing them from keyboard navigation. This actively breaks standard keyboard accessibility for critical features.
+**Action:** When auditing forms or modals in this application, specifically look for `tabindex="-1"` on `<button>` elements, as it might be an intentional but flawed pattern used to prevent default focus behavior at the cost of accessibility. Ensure these are removed so standard keyboard access works.
