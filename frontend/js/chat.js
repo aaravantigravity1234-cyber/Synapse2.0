@@ -813,7 +813,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else {
         attachmentPreviews.push(`<span style="color:#00dbe9;font-size:0.8rem; display: block;">📎 Attached: ${escapeHtml(file.filename)}</span>`);
       }
@@ -1619,6 +1619,10 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function escapeAttribute(text) {
+  return escapeHtml(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // ── Copy Code to Clipboard ──
