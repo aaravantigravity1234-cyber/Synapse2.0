@@ -1792,6 +1792,7 @@ header {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  color: #e2e2e9 !important;
 }
 
 #suggestion-chips-container button:hover {
@@ -1809,7 +1810,7 @@ header {
 html:not(.dark) #suggestion-chips-container button {
   background: rgba(0, 0, 0, 0.04);
   border-color: rgba(0, 0, 0, 0.08);
-  color: #333;
+  color: #1a1b21 !important;
 }
 
 html:not(.dark) #suggestion-chips-container button:hover {

@@ -1,0 +1,1 @@
+- Added `!important` to the color definitions in `#suggestion-chips-container button` and `html:not(.dark) #suggestion-chips-container button` to ensure the text color properly overrides the inherited `text-on-surface-variant` color from Tailwind classes in dark and light themes, making suggestions readable.
