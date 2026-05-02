@@ -12,6 +12,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase-admin": "^13.0.2",
+    "jsdom": "^29.1.1",
     "openai": "^4.77.0"
   }
 }
