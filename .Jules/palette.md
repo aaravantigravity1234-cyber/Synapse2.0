@@ -1,0 +1,3 @@
+## 2026-05-02 - Interactive Icon Buttons & tabindex
+**Learning:** Found a pattern where interactive icon buttons (like password visibility toggles) were using `tabindex="-1"`. While this might have been an attempt to prevent focus stealing during form filling, it fundamentally breaks keyboard accessibility by completely removing the control from the tab order. Screen reader and keyboard-only users cannot interact with or discover these controls.
+**Action:** Never use `tabindex="-1"` on interactive elements unless explicitly managing focus within a complex widget (like roving tabindex in a menu). Always ensure icon-only buttons remain in the default tab order and have an explicit `aria-label` explaining their function.
