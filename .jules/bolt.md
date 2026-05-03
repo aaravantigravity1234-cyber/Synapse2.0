@@ -1,0 +1,3 @@
+## 2024-05-28 - Optimizing High-Frequency DOM Layout Property Reads in Event Listeners
+**Learning:** Reading layout-triggering properties like `window.scrollY`, `window.innerHeight`, or `scrollHeight` directly inside high-frequency event handlers (`scroll`, `resize`, `touchmove`) forces the browser to recalculate layouts synchronously, causing layout thrashing and dropping main thread frame rates.
+**Action:** Always wrap the handler logic for these high-frequency events in `window.requestAnimationFrame()` combined with a 'ticking' boolean flag. This ensures the layout property reads and subsequent updates are synchronized with the display's refresh rate and do not execute more frequently than the browser can render them.
