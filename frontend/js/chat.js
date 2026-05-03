@@ -1089,6 +1089,7 @@ async function getAuraResponse(hadImage = false) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let lastRenderTime = 0; // Optimization: Throttle Markdown rendering during stream
 
     while (true) {
       const { done, value } = await reader.read();
@@ -1143,9 +1144,14 @@ async function getAuraResponse(hadImage = false) {
               contentContainer.className = "answer-content";
               bubbleEl.appendChild(contentContainer);
             }
-            contentContainer.innerHTML = renderMarkdown(fullContent, true) + '<span class="typing-cursor"></span>';
+
+            const now = Date.now();
+            if (now - lastRenderTime > 50) {
+              contentContainer.innerHTML = renderMarkdown(fullContent, true) + '<span class="typing-cursor"></span>';
+              lastRenderTime = now;
+              scrollToBottom();
+            }
             setOrbState('responding');
-            scrollToBottom();
           }
         } catch (parseErr) {
           // Skip malformed chunks
