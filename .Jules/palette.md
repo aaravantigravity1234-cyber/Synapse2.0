@@ -1,0 +1,2 @@
+- Use native elements like `<details>`/`<summary>` carefully when nested in structures with complex pointer-events or click handlers. Always ensure pointer-events are set to auto if parents enforce none.
+- Use `event.stopPropagation()` on interactive elements inside message bubbles to prevent document-level or bubble-level listeners from swallowing the click events, ensuring native expand/collapse functionality works.

@@ -1073,7 +1073,7 @@ async function getAuraResponse(hadImage = false) {
             if (!reasoningEl) {
               reasoningEl = document.createElement("details");
               reasoningEl.className = "thinking-block";
-              reasoningEl.innerHTML = `<summary><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">psychology</span>Thinking...</summary><div class="thinking-content"></div>`;
+              reasoningEl.innerHTML = `<summary onclick="event.stopPropagation()"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">psychology</span>Thinking...</summary><div class="thinking-content"></div>`;
               reasoningEl.open = true;
               bubbleEl.prepend(reasoningEl);
             }
@@ -1087,6 +1087,7 @@ async function getAuraResponse(hadImage = false) {
             if (reasoningEl && reasoningEl.open) {
               reasoningEl.open = false;
               reasoningEl.querySelector("summary").innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">psychology</span>View reasoning`;
+              reasoningEl.querySelector("summary").onclick = (e) => e.stopPropagation();
             }
             // Render content after the reasoning block
             let contentContainer = bubbleEl.querySelector(".answer-content");

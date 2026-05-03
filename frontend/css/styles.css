@@ -809,6 +809,7 @@ body {
   background: rgba(119, 1, 208, 0.06);
   overflow: hidden;
   animation: thinking-in 0.3s ease;
+  pointer-events: auto;
 }
 
 @keyframes thinking-in {
@@ -826,6 +827,7 @@ body {
   align-items: center;
   user-select: none;
   transition: background 0.2s;
+  pointer-events: auto;
 }
 
 .thinking-block summary:hover {
