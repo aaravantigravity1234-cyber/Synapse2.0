@@ -1,0 +1,3 @@
+## 2024-05-04 - Keyboard Accessibility Broken by `tabindex="-1"` on Interactive Elements
+**Learning:** Found a pattern in this application where `tabindex="-1"` was added to interactive icon-only buttons (like the password toggle button) presumably to avoid tab-stopping on it. This completely breaks keyboard accessibility, as screen reader users and keyboard navigators cannot reach or trigger the element natively.
+**Action:** Always ensure interactive elements (like buttons) retain their natural tab order. If they are purely decorative or redundant, they shouldn't be buttons. If they are interactive, they must remain focusable and have appropriate `aria-label`s.
