@@ -1,0 +1,4 @@
+## 2026-05-04 - XSS via Unescaped Quotes and Inline Event Handlers
+**Vulnerability:** Found multiple XSS vectors in `frontend/js/chat.js` due to dynamic properties (like `chat.id` and file names) being injected unescaped into inline `onclick` handlers and `alt` attributes.
+**Learning:** Browsers decode HTML entities in inline event handlers *before* JavaScript executes. Escaping quotes (`&quot;`, `&#39;`) in an `onclick` is insufficient if the context allows breaking out. Standard `escapeHtml` functions often miss quotes if designed for inner text only.
+**Prevention:** Never use inline JavaScript event handlers (`onclick="..."`) for dynamic user data. Always attach dynamic variables using DOM methods like `dataset` and handle them with secure `addEventListener` callbacks. When injecting into HTML attributes, use a rigorous `escapeAttribute` function that replaces quotes.

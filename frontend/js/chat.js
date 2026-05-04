@@ -243,10 +243,16 @@ function renderAttachments() {
     
     item.innerHTML = `
       ${previewHtml}
-      <button type="button" onclick="removeAttachment(${index})" class="absolute top-1 right-1 w-5 h-5 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/80 focus:opacity-100 z-10" title="Remove attachment">
+      <button type="button" data-index="${index}" class="remove-attachment-btn absolute top-1 right-1 w-5 h-5 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/80 focus:opacity-100 z-10" title="Remove attachment">
         <span class="material-symbols-outlined" style="font-size:14px;">close</span>
       </button>
     `;
+    const btn = item.querySelector('.remove-attachment-btn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        removeAttachment(index);
+      });
+    }
     attachmentPreviewContainer.appendChild(item);
   });
 }
@@ -949,14 +955,27 @@ function loadHistoryIndex(searchQuery = '') {
       item.className = "history-item";
       const date = formatRelativeTime(chat.updatedAt);
       item.innerHTML = `
-        <div class="flex-1 overflow-hidden" onclick="loadSession('${chat.id}')">
+        <div class="history-item-content flex-1 overflow-hidden" data-chat-id="${escapeAttribute(chat.id)}">
           <p class="text-on-surface font-bold text-sm truncate">${escapeHtml(chat.title)}</p>
           <p class="text-on-surface-variant text-xs">${date}</p>
         </div>
-        <button onclick="event.stopPropagation(); deleteSession('${chat.id}')" class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
+        <button data-chat-id="${escapeAttribute(chat.id)}" class="delete-chat-btn w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
           <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
         </button>
       `;
+      const contentDiv = item.querySelector('.history-item-content');
+      if (contentDiv) {
+        contentDiv.addEventListener('click', () => {
+          loadSession(chat.id);
+        });
+      }
+      const deleteBtn = item.querySelector('.delete-chat-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          deleteSession(chat.id);
+        });
+      }
       historyListContainer.appendChild(item);
     });
   });
@@ -993,7 +1012,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else {
         attachmentPreviews.push(`<span style="color:#00dbe9;font-size:0.8rem; display: block;">📎 Attached: ${escapeHtml(file.filename)}</span>`);
       }
@@ -1978,6 +1997,16 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttribute(text) {
+  if (typeof text !== "string") return String(text ?? "");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // ── Copy Code to Clipboard ──
 function copyCode(btn) {
   const wrapper = btn.closest(".code-block-wrapper");
@@ -2314,10 +2343,26 @@ function showModelWarning(originalModel) {
   banner.className = 'model-warning-banner';
   banner.innerHTML = `
     <span class="material-symbols-outlined">info</span>
-    <span>This chat was with <strong>${originalModel}</strong></span>
-    <button onclick="switchToModel('${originalModel}'); this.closest('.model-warning-banner').remove();">Switch back</button>
-    <button onclick="this.closest('.model-warning-banner').remove();" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
+    <span>This chat was with <strong>${escapeHtml(originalModel)}</strong></span>
+    <button class="switch-back-btn" data-model="${escapeAttribute(originalModel)}">Switch back</button>
+    <button class="close-banner-btn" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
   `;
+
+  const switchBackBtn = banner.querySelector('.switch-back-btn');
+  if (switchBackBtn) {
+    switchBackBtn.addEventListener('click', () => {
+      switchToModel(originalModel);
+      banner.remove();
+    });
+  }
+
+  const closeBannerBtn = banner.querySelector('.close-banner-btn');
+  if (closeBannerBtn) {
+    closeBannerBtn.addEventListener('click', () => {
+      banner.remove();
+    });
+  }
+
   chatMessages.insertBefore(banner, chatMessages.firstChild);
 }
 
