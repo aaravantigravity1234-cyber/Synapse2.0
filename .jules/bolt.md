@@ -1,0 +1,3 @@
+## 2024-05-04 - RequestAnimationFrame for Scroll Handlers
+**Learning:** High-frequency frontend event handlers (like 'scroll') that read layout-triggering properties (e.g., `scrollHeight`, `scrollY`, `innerHeight`) must be wrapped in a `window.requestAnimationFrame()` callback with a ticking flag. In this specific vanilla JS architecture, raw scroll events were evaluating multiple layout thresholds on every scroll tick, risking main thread blocking and layout thrashing (especially on mobile devices during chat interactions).
+**Action:** Always wrap high-frequency DOM/layout reading event handlers (resize, scroll, mousemove) in a requestAnimationFrame with a `ticking` boolean flag to batch layout reads and throttle execution to the display refresh rate.

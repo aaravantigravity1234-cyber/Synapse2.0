@@ -132,9 +132,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Scroll Indicator ──
   const scrollIndicator = document.getElementById('scroll-indicator');
+  let scrollIndicatorTicking = false;
   if (scrollIndicator) {
     window.addEventListener('scroll', () => {
-      scrollIndicator.style.opacity = window.scrollY > 80 ? '0' : '1';
+      if (!scrollIndicatorTicking) {
+        window.requestAnimationFrame(() => {
+          scrollIndicator.style.opacity = window.scrollY > 80 ? '0' : '1';
+          scrollIndicatorTicking = false;
+        });
+        scrollIndicatorTicking = true;
+      }
     }, { passive: true });
   }
 
