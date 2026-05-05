@@ -993,7 +993,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else {
         attachmentPreviews.push(`<span style="color:#00dbe9;font-size:0.8rem; display: block;">📎 Attached: ${escapeHtml(file.filename)}</span>`);
       }
@@ -1978,6 +1978,16 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttribute(text) {
+  if (typeof text !== "string") return String(text ?? "");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // ── Copy Code to Clipboard ──
 function copyCode(btn) {
   const wrapper = btn.closest(".code-block-wrapper");
@@ -2312,12 +2322,30 @@ function showModelWarning(originalModel) {
   
   const banner = document.createElement('div');
   banner.className = 'model-warning-banner';
+
+  // Use escapeHtml to securely render originalModel in text content
+  const safeModelName = escapeHtml(originalModel);
+
   banner.innerHTML = `
     <span class="material-symbols-outlined">info</span>
-    <span>This chat was with <strong>${originalModel}</strong></span>
-    <button onclick="switchToModel('${originalModel}'); this.closest('.model-warning-banner').remove();">Switch back</button>
-    <button onclick="this.closest('.model-warning-banner').remove();" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
+    <span>This chat was with <strong>${safeModelName}</strong></span>
+    <button class="switch-back-btn">Switch back</button>
+    <button class="close-warning-btn" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
   `;
+
+  // Attach event listeners dynamically to avoid inline handlers for XSS safety
+  const switchBackBtn = banner.querySelector('.switch-back-btn');
+  switchBackBtn.dataset.model = originalModel;
+  switchBackBtn.addEventListener('click', function() {
+    switchToModel(this.dataset.model);
+    banner.remove();
+  });
+
+  const closeWarningBtn = banner.querySelector('.close-warning-btn');
+  closeWarningBtn.addEventListener('click', function() {
+    banner.remove();
+  });
+
   chatMessages.insertBefore(banner, chatMessages.firstChild);
 }
 
