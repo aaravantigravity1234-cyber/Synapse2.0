@@ -402,6 +402,7 @@ if (saveSettingsBtn) {
 // ── Sidebar Logic ──
 if (modelSelectorBtn && modelDropdown) {
   modelSelectorBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const isHidden = modelDropdown.classList.contains("hidden");
     if (isHidden) {
@@ -417,7 +418,7 @@ if (modelSelectorBtn && modelDropdown) {
   });
 
   document.addEventListener("click", (e) => {
-    if (!modelDropdown.contains(e.target) && !modelSelectorBtn.contains(e.target)) {
+    if (!modelDropdown.contains(e.target) && !modelSelectorBtn.contains(e.target) && !e.target.closest("#model-selector-btn")) {
       closeModelDropdown();
     }
   });
