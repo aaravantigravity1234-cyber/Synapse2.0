@@ -133,8 +133,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Scroll Indicator ──
   const scrollIndicator = document.getElementById('scroll-indicator');
   if (scrollIndicator) {
+    let isIndicatorScrollTicking = false;
+    // ⚡ Bolt: Throttled scroll listener using requestAnimationFrame
+    // to improve scrolling frame rate and reduce DOM thrashing.
     window.addEventListener('scroll', () => {
-      scrollIndicator.style.opacity = window.scrollY > 80 ? '0' : '1';
+      if (!isIndicatorScrollTicking) {
+        window.requestAnimationFrame(() => {
+          scrollIndicator.style.opacity = window.scrollY > 80 ? '0' : '1';
+          isIndicatorScrollTicking = false;
+        });
+        isIndicatorScrollTicking = true;
+      }
     }, { passive: true });
   }
 

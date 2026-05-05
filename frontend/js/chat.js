@@ -1217,21 +1217,31 @@ function updateScrollBtn() {
 // ── Scroll To Bottom ──
 let userHasScrolledUp = false;
 let lastScrollY = window.scrollY || 0;
+let isScrollTicking = false;
 
+// ⚡ Bolt: Throttling the scroll event with requestAnimationFrame
+// to prevent layout thrashing and reduce main thread workload
+// during high-frequency scrolling interactions.
 window.addEventListener("scroll", () => {
-  const currentScrollY = window.scrollY;
-  const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
-  
-  if (currentScrollY < lastScrollY) {
-    if (distFromBottom > 200) {
-      userHasScrolledUp = true;
-    }
-  } else if (distFromBottom <= 200) {
-    userHasScrolledUp = false;
+  if (!isScrollTicking) {
+    window.requestAnimationFrame(() => {
+      const currentScrollY = window.scrollY;
+      const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
+
+      if (currentScrollY < lastScrollY) {
+        if (distFromBottom > 200) {
+          userHasScrolledUp = true;
+        }
+      } else if (distFromBottom <= 200) {
+        userHasScrolledUp = false;
+      }
+
+      lastScrollY = currentScrollY;
+      updateScrollBtn();
+      isScrollTicking = false;
+    });
+    isScrollTicking = true;
   }
-  
-  lastScrollY = currentScrollY;
-  updateScrollBtn();
 }, { passive: true });
 
 if (scrollToBottomBtn) {
@@ -2244,11 +2254,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Header Scroll Shadow ──
   const headerEl = document.querySelector('header');
   if (headerEl) {
+    let isHeaderScrollTicking = false;
+    // ⚡ Bolt: Throttling header scroll updates to 60fps to prevent
+    // excessive DOM layout recalculations on rapid scrolling.
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 10) {
-        headerEl.classList.add('scrolled');
-      } else {
-        headerEl.classList.remove('scrolled');
+      if (!isHeaderScrollTicking) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY > 10) {
+            headerEl.classList.add('scrolled');
+          } else {
+            headerEl.classList.remove('scrolled');
+          }
+          isHeaderScrollTicking = false;
+        });
+        isHeaderScrollTicking = true;
       }
     }, { passive: true });
   }
