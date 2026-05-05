@@ -1,0 +1,3 @@
+## 2024-05-05 - Avoid tabindex="-1" on interactive buttons
+**Learning:** In this app, `tabindex="-1"` has been used on interactive elements like the password visibility toggle to intentionally but erroneously remove them from the tab order. This breaks standard keyboard accessibility and prevents screen reader users from accessing these controls via the keyboard.
+**Action:** Always verify that interactive elements like icon buttons do not have `tabindex="-1"` unless they are explicitly meant to be non-interactive or focus is managed purely via custom JS logic. When restoring keyboard accessibility, ensure appropriate ARIA labels are also added.
