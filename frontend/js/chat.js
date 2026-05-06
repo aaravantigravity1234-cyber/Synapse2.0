@@ -2244,11 +2244,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Header Scroll Shadow ──
   const headerEl = document.querySelector('header');
   if (headerEl) {
+    let tickingChatScroll = false;
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 10) {
-        headerEl.classList.add('scrolled');
-      } else {
-        headerEl.classList.remove('scrolled');
+      if (!tickingChatScroll) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY > 10) {
+            headerEl.classList.add('scrolled');
+          } else {
+            headerEl.classList.remove('scrolled');
+          }
+          tickingChatScroll = false;
+        });
+        tickingChatScroll = true;
       }
     }, { passive: true });
   }

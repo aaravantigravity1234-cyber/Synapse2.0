@@ -1,0 +1,3 @@
+## 2024-05-06 - Layout Thrashing in Global Event Listeners
+**Learning:** Attaching continuous event listeners (like `scroll` or `mousemove`) directly to global events blocks the main thread because calculating values like `window.scrollY` or layout positions triggers forced synchronous layouts (layout thrashing). On the main landing and chat pages, these triggered many times per second during interactions without throttle.
+**Action:** Next time dealing with scroll or mousemove-driven UI elements (like dynamic header shadows or parallax items), always wrap the DOM read/write logic inside `window.requestAnimationFrame()` controlled by a ticking boolean flag. This couples event updates strictly to the browser's render cycle.
