@@ -161,8 +161,6 @@ document.addEventListener('mousemove', (e) => {
   orbContainer.style.transform = `translate(${mouseX * 30}px, ${mouseY * 30}px)`;
 });
 
-console.log('Synapse AI Landing Page Online.');
-
 // ── (#14) Mobile Hamburger Menu ──
 (function() {
   const menuBtn = document.getElementById('mobile-menu-btn');
