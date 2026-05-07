@@ -26,8 +26,8 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 
 // ── Simple Rate Limiter (in-memory) ──
 const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX = 20; // 20 requests per minute per user
+const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW, 10) || 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX, 10) || 20; // 20 requests per minute per user
 
 function rateLimit(req, res, next) {
   const userId = req.user?.uid || req.ip;
