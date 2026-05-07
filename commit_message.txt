@@ -1,0 +1,13 @@
+🧹 Remove temporary vision API debug logs
+
+🎯 What
+Removed the temporary console.log block in backend/server.js that was used to log the payload sent to the Vision API.
+
+💡 Why
+The logging statement was added for debugging purposes. As noted in the comments, it is a straightforward debugging console.log that should be removed before production to keep the logs clean and prevent unnecessary noise.
+
+✅ Verification
+Ran node -c backend/server.js to verify syntax correctness. Started the backend server successfully.
+
+✨ Result
+The backend code is cleaner and ready for production, no longer outputting debug logs for Vision API calls.

@@ -216,16 +216,6 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
     
     // Mistral Small 3.1 uses standard OpenAI image_url format — no transformation needed.
     // Messages are already in the correct { type: "image_url", image_url: { url: "data:..." } } format.
-    // Log what we're sending for debugging:
-    if (hasImage) {
-      const lastMsg = apiMessages[apiMessages.length - 1];
-      if (Array.isArray(lastMsg?.content)) {
-        const imgBlock = lastMsg.content.find(b => b.type === "image_url");
-        const urlLen = imgBlock?.image_url?.url?.length || 0;
-        console.log(`[VISION] Sending to API — url length: ${urlLen} chars, model: ${targetModel}`);
-      }
-    }
-
     const params = {
       model: targetModel,
       messages: [
