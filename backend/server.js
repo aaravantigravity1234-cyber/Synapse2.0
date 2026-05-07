@@ -185,6 +185,8 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
       });
 
       if (!nvImgResponse.ok) {
+        const errorText = await nvImgResponse.text();
+        console.error(`[ERROR] Image Generation API failed: ${nvImgResponse.status} ${nvImgResponse.statusText} | Body: ${errorText}`);
         throw new Error(`Image API error: ${nvImgResponse.status} ${nvImgResponse.statusText}`);
       }
 
@@ -281,22 +283,31 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     res.end();
   } catch (err) {
-    console.error("AI API error:", err.message, err.response?.data);
-    console.error("Full error:", JSON.stringify(err, null, 2));
+    const realError = err?.error?.message || err?.message || err?.toString();
+    console.error(`[ERROR] Chat API failed. Model: ${targetModel} | Status: ${err.status} | Error: ${realError}`);
+    if (err.response?.data) {
+      console.error("API Response Data:", JSON.stringify(err.response.data, null, 2));
+    }
+    if (err.stack) {
+      console.error("Stack Trace:", err.stack);
+    }
     
     let errorMsg = "Aura encountered an issue. Please try again.";
     if (hasImage) {
-      // Log the REAL error so we can debug:
-      const realError = err?.error?.message || err?.message || JSON.stringify(err);
-      console.error(`[ERROR] Vision model failed. Model: ${targetModel} | Error: ${realError}`);
       if (err.status === 404 || realError.includes("not found") || realError.includes("404")) {
         errorMsg = "Vision model not available on this API account. Contact support.";
       } else if (err.status === 400) {
-        errorMsg = `Image rejected by API: ${realError}`;
+        errorMsg = "Image rejected by API. Please try a different image.";
       } else if (err.status === 401) {
         errorMsg = "Invalid Vision API Key.";
       } else {
-        errorMsg = `Image analysis failed: ${realError}`;
+        errorMsg = "Image analysis failed. Please try again.";
+      }
+    } else if (hasAudioVideo) {
+      if (err.status === 401) {
+        errorMsg = "Invalid Media API Key.";
+      } else {
+        errorMsg = "Media analysis failed. Please try again.";
       }
     } else if (err.status === 429) {
       errorMsg = "Rate limit exceeded. Please wait a moment.";
