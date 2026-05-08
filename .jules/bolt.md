@@ -1,0 +1,3 @@
+## 2024-05-08 - Throttle high-frequency DOM events
+**Learning:** High-frequency frontend event handlers (like 'scroll', 'resize', or 'mousemove') that perform layout-triggering property reads (e.g., `scrollY`, `innerHeight`) and writes can cause severe layout thrashing and block the main thread.
+**Action:** Always wrap the callbacks for these events in a `window.requestAnimationFrame()` block and use a ticking flag to prevent multiple `rAF` callbacks from queueing up in a single frame. This ensures DOM updates are synchronized with the browser's refresh rate.
