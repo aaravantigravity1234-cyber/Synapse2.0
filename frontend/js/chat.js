@@ -1018,15 +1018,34 @@ function loadHistoryIndex(searchQuery = '') {
       const item = document.createElement("div");
       item.className = "history-item";
       const date = formatRelativeTime(chat.updatedAt);
+      const safeId = escapeAttribute(chat.id);
       item.innerHTML = `
-        <div class="flex-1 overflow-hidden" onclick="loadSession('${chat.id}')">
+        <div class="flex-1 overflow-hidden" data-session-id="${safeId}" style="cursor:pointer;">
           <p class="text-on-surface font-bold text-sm truncate">${escapeHtml(chat.title)}</p>
           <p class="text-on-surface-variant text-xs">${date}</p>
         </div>
-        <button onclick="event.stopPropagation(); deleteSession('${chat.id}')" class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
+        <button data-delete-id="${safeId}" class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
           <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
         </button>
       `;
+
+      const sessionDiv = item.querySelector('[data-session-id]');
+      if (sessionDiv) {
+        sessionDiv.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-session-id');
+          if (id) loadSession(id);
+        });
+      }
+
+      const deleteBtn = item.querySelector('[data-delete-id]');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.getAttribute('data-delete-id');
+          if (id) deleteSession(id);
+        });
+      }
+
       historyListContainer.appendChild(item);
     });
   });
@@ -1066,7 +1085,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else if (file.mimeType.startsWith("audio/")) {
         attachmentPreviews.push(`<div style="display:flex;align-items:center;gap:8px;background:rgba(0,219,233,0.1);padding:8px;border-radius:8px;margin-top:8px;"><span class="material-symbols-outlined" style="color:#00dbe9;">audiotrack</span><span style="color:#dbfcff;font-size:0.8rem;">${escapeHtml(file.filename)}</span></div>`);
       } else if (file.mimeType.startsWith("video/")) {
@@ -2068,6 +2087,16 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttribute(text) {
+  if (typeof text !== "string") return String(text ?? "");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // ── Copy Code to Clipboard ──
 function copyCode(btn) {
   const wrapper = btn.closest(".code-block-wrapper");
@@ -2402,12 +2431,32 @@ function showModelWarning(originalModel) {
   
   const banner = document.createElement('div');
   banner.className = 'model-warning-banner';
+
+  // Create safely without inline event handlers
+  const safeOriginalModel = escapeAttribute(originalModel);
   banner.innerHTML = `
     <span class="material-symbols-outlined">info</span>
-    <span>This chat was with <strong>${originalModel}</strong></span>
-    <button onclick="switchToModel('${originalModel}'); this.closest('.model-warning-banner').remove();">Switch back</button>
-    <button onclick="this.closest('.model-warning-banner').remove();" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
+    <span>This chat was with <strong>${escapeHtml(originalModel)}</strong></span>
+    <button class="switch-back-btn" data-model="${safeOriginalModel}">Switch back</button>
+    <button class="close-banner-btn" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
   `;
+
+  const switchBtn = banner.querySelector('.switch-back-btn');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', (e) => {
+      const model = e.currentTarget.getAttribute('data-model');
+      if (model) switchToModel(model);
+      banner.remove();
+    });
+  }
+
+  const closeBtn = banner.querySelector('.close-banner-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      banner.remove();
+    });
+  }
+
   chatMessages.insertBefore(banner, chatMessages.firstChild);
 }
 
