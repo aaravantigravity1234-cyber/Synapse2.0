@@ -2404,10 +2404,25 @@ function showModelWarning(originalModel) {
   banner.className = 'model-warning-banner';
   banner.innerHTML = `
     <span class="material-symbols-outlined">info</span>
-    <span>This chat was with <strong>${originalModel}</strong></span>
-    <button onclick="switchToModel('${originalModel}'); this.closest('.model-warning-banner').remove();">Switch back</button>
-    <button onclick="this.closest('.model-warning-banner').remove();" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
+    <span class="warning-text">This chat was with <strong class="warning-model-name"></strong></span>
+    <button class="switch-back-btn">Switch back</button>
+    <button class="close-banner-btn" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
   `;
+
+  banner.querySelector('.warning-model-name').textContent = originalModel;
+
+  const switchBackBtn = banner.querySelector('.switch-back-btn');
+  switchBackBtn.dataset.model = originalModel;
+  switchBackBtn.addEventListener('click', function() {
+    switchToModel(this.dataset.model);
+    banner.remove();
+  });
+
+  const closeBannerBtn = banner.querySelector('.close-banner-btn');
+  closeBannerBtn.addEventListener('click', function() {
+    banner.remove();
+  });
+
   chatMessages.insertBefore(banner, chatMessages.firstChild);
 }
 
