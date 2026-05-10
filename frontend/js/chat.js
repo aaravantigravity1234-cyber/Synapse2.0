@@ -1283,9 +1283,9 @@ function setOrbState(state) {
 // ── Scroll-to-Bottom Button ──
 const scrollToBottomBtn = document.getElementById("scroll-to-bottom-btn");
 
-function updateScrollBtn() {
+function updateScrollBtn(providedDistFromBottom) {
   if (!scrollToBottomBtn) return;
-  const distFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+  const distFromBottom = providedDistFromBottom !== undefined ? providedDistFromBottom : document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
   // Compare distFromBottom; we use 200px threshold
   if (distFromBottom > 200) {
     scrollToBottomBtn.style.opacity = "1";
@@ -1301,21 +1301,28 @@ function updateScrollBtn() {
 // ── Scroll To Bottom ──
 let userHasScrolledUp = false;
 let lastScrollY = window.scrollY || 0;
+let chatScrollTicking = false;
 
 window.addEventListener("scroll", () => {
-  const currentScrollY = window.scrollY;
-  const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
-  
-  if (currentScrollY < lastScrollY) {
-    if (distFromBottom > 200) {
-      userHasScrolledUp = true;
-    }
-  } else if (distFromBottom <= 200) {
-    userHasScrolledUp = false;
+  if (!chatScrollTicking) {
+    window.requestAnimationFrame(() => {
+      const currentScrollY = window.scrollY;
+      const distFromBottom = document.documentElement.scrollHeight - currentScrollY - window.innerHeight;
+
+      if (currentScrollY < lastScrollY) {
+        if (distFromBottom > 200) {
+          userHasScrolledUp = true;
+        }
+      } else if (distFromBottom <= 200) {
+        userHasScrolledUp = false;
+      }
+
+      lastScrollY = currentScrollY;
+      updateScrollBtn(distFromBottom);
+      chatScrollTicking = false;
+    });
+    chatScrollTicking = true;
   }
-  
-  lastScrollY = currentScrollY;
-  updateScrollBtn();
 }, { passive: true });
 
 if (scrollToBottomBtn) {
@@ -2121,17 +2128,24 @@ function formatRelativeTime(timestamp) {
 if (window.visualViewport) {
   const chatFooter = document.getElementById("chat-footer");
   const footerGradient = document.querySelector(".footer-gradient");
+  let viewportResizeTicking = false;
   
   window.visualViewport.addEventListener("resize", () => {
     if (!chatFooter) return;
-    const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    if (offsetBottom > 50) {
-      // Keyboard is open
-      chatFooter.style.bottom = offsetBottom + "px";
-      if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
-    } else {
-      chatFooter.style.bottom = "0px";
-      if (footerGradient) footerGradient.style.bottom = "0px";
+    if (!viewportResizeTicking) {
+      window.requestAnimationFrame(() => {
+        const offsetBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+        if (offsetBottom > 50) {
+          // Keyboard is open
+          chatFooter.style.bottom = offsetBottom + "px";
+          if (footerGradient) footerGradient.style.bottom = offsetBottom + "px";
+        } else {
+          chatFooter.style.bottom = "0px";
+          if (footerGradient) footerGradient.style.bottom = "0px";
+        }
+        viewportResizeTicking = false;
+      });
+      viewportResizeTicking = true;
     }
   });
 }
@@ -2334,11 +2348,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Header Scroll Shadow ──
   const headerEl = document.querySelector('header');
   if (headerEl) {
+    let headerScrollTicking = false;
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 10) {
-        headerEl.classList.add('scrolled');
-      } else {
-        headerEl.classList.remove('scrolled');
+      if (!headerScrollTicking) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY > 10) {
+            headerEl.classList.add('scrolled');
+          } else {
+            headerEl.classList.remove('scrolled');
+          }
+          headerScrollTicking = false;
+        });
+        headerScrollTicking = true;
       }
     }, { passive: true });
   }
