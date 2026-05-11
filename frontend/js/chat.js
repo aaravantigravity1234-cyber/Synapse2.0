@@ -1017,15 +1017,28 @@ function loadHistoryIndex(searchQuery = '') {
       const item = document.createElement("div");
       item.className = "history-item";
       const date = formatRelativeTime(chat.updatedAt);
-      item.innerHTML = `
-        <div class="flex-1 overflow-hidden" onclick="loadSession('${chat.id}')">
-          <p class="text-on-surface font-bold text-sm truncate">${escapeHtml(chat.title)}</p>
-          <p class="text-on-surface-variant text-xs">${date}</p>
-        </div>
-        <button onclick="event.stopPropagation(); deleteSession('${chat.id}')" class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors" aria-label="Delete chat">
-          <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
-        </button>
+
+      const contentDiv = document.createElement("div");
+      contentDiv.className = "flex-1 overflow-hidden";
+      contentDiv.dataset.sessionId = chat.id;
+      contentDiv.innerHTML = `
+        <p class="text-on-surface font-bold text-sm truncate">${escapeHtml(chat.title)}</p>
+        <p class="text-on-surface-variant text-xs">${date}</p>
       `;
+      contentDiv.addEventListener("click", () => loadSession(chat.id));
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-white/5 transition-colors";
+      deleteBtn.setAttribute("aria-label", "Delete chat");
+      deleteBtn.dataset.deleteId = chat.id;
+      deleteBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>';
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteSession(chat.id);
+      });
+
+      item.appendChild(contentDiv);
+      item.appendChild(deleteBtn);
       historyListContainer.appendChild(item);
     });
   });
@@ -1065,7 +1078,7 @@ function sendMessage() {
     let attachmentPreviews = [];
     for (const file of attachedFiles) {
       if (file.isImage) {
-        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeHtml(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
+        attachmentPreviews.push(`<img src="${file.data}" alt="${escapeAttribute(file.filename)}" style="max-height: 200px; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);"/>`);
       } else if (file.mimeType.startsWith("audio/")) {
         attachmentPreviews.push(`<div style="display:flex;align-items:center;gap:8px;background:rgba(0,219,233,0.1);padding:8px;border-radius:8px;margin-top:8px;"><span class="material-symbols-outlined" style="color:#00dbe9;">audiotrack</span><span style="color:#dbfcff;font-size:0.8rem;">${escapeHtml(file.filename)}</span></div>`);
       } else if (file.mimeType.startsWith("video/")) {
@@ -2095,6 +2108,11 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttribute(text) {
+  if (typeof text !== "string") return String(text ?? "");
+  return escapeHtml(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ── Copy Code to Clipboard ──
 function copyCode(btn) {
   const wrapper = btn.closest(".code-block-wrapper");
@@ -2541,6 +2559,7 @@ window.exportCurrentChat = exportCurrentChat;
 
 
 // (#10) Model Warning when loading old chat with different model
+window.showModelWarning = showModelWarning;
 function showModelWarning(originalModel) {
   if (!originalModel || originalModel === currentModelName) return;
   
@@ -2550,12 +2569,37 @@ function showModelWarning(originalModel) {
   
   const banner = document.createElement('div');
   banner.className = 'model-warning-banner';
-  banner.innerHTML = `
-    <span class="material-symbols-outlined">info</span>
-    <span>This chat was with <strong>${originalModel}</strong></span>
-    <button onclick="switchToModel('${originalModel}'); this.closest('.model-warning-banner').remove();">Switch back</button>
-    <button onclick="this.closest('.model-warning-banner').remove();" style="background:none;border:none;color:rgba(255,200,100,0.5);padding:2px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
-  `;
+
+  const iconSpan = document.createElement('span');
+  iconSpan.className = 'material-symbols-outlined';
+  iconSpan.textContent = 'info';
+
+  const textSpan = document.createElement('span');
+  textSpan.innerHTML = `This chat was with <strong>${escapeHtml(originalModel)}</strong>`;
+
+  const switchBtn = document.createElement('button');
+  switchBtn.textContent = 'Switch back';
+  switchBtn.addEventListener('click', () => {
+    switchToModel(originalModel);
+    banner.remove();
+  });
+
+  const closeBtn = document.createElement('button');
+  closeBtn.style.background = 'none';
+  closeBtn.style.border = 'none';
+  closeBtn.style.color = 'rgba(255,200,100,0.5)';
+  closeBtn.style.padding = '2px';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">close</span>';
+  closeBtn.addEventListener('click', () => {
+    banner.remove();
+  });
+
+  banner.appendChild(iconSpan);
+  banner.appendChild(textSpan);
+  banner.appendChild(switchBtn);
+  banner.appendChild(closeBtn);
+
   chatMessages.insertBefore(banner, chatMessages.firstChild);
 }
 

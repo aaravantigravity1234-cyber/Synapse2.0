@@ -1,0 +1,4 @@
+## 2025-02-14 - Fix DOM XSS via Unescaped Quotes and Inline Event Handlers
+**Vulnerability:** Filenames and original model names containing double quotes could break out of `alt="..."` and `onclick="..."` HTML string boundaries, allowing arbitrary JS execution (XSS) when rendered in the UI.
+**Learning:** `escapeHtml` only escaped `<` and `>`, leaving `"` and `'` vulnerable in context of attributes. Interpolating any user-controlled string into inline JS handlers (`onclick`) is inherently dangerous because HTML decodes entities before JavaScript execution, neutralizing standard HTML escaping.
+**Prevention:** Use a dedicated `escapeAttribute` helper (that replaces quotes) for simple string attributes, but completely avoid inline JS events (like `onclick="func('${id}')"`) in favor of passing strings via safe `dataset` attributes and using standard DOM `addEventListener` attachments.
