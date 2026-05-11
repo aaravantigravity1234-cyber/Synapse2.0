@@ -152,13 +152,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Parallax Orb on Mouse Move ──
+let orbTicking = false;
+let orbMouseX = 0;
+let orbMouseY = 0;
+const orbContainer = document.querySelector('.aura-orb-container');
+
 document.addEventListener('mousemove', (e) => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const orbContainer = document.querySelector('.aura-orb-container');
   if (!orbContainer) return;
-  const mouseX = e.clientX / window.innerWidth - 0.5;
-  const mouseY = e.clientY / window.innerHeight - 0.5;
-  orbContainer.style.transform = `translate(${mouseX * 30}px, ${mouseY * 30}px)`;
+
+  orbMouseX = e.clientX;
+  orbMouseY = e.clientY;
+
+  if (!orbTicking) {
+    window.requestAnimationFrame(() => {
+      const mouseX = orbMouseX / window.innerWidth - 0.5;
+      const mouseY = orbMouseY / window.innerHeight - 0.5;
+      orbContainer.style.transform = `translate(${mouseX * 30}px, ${mouseY * 30}px)`;
+      orbTicking = false;
+    });
+    orbTicking = true;
+  }
 });
 
 console.log('Synapse AI Landing Page Online.');
