@@ -1,0 +1,3 @@
+## 2026-05-11 - Keyboard Accessibility Anti-Pattern: Password Toggles
+**Learning:** Adding `tabindex="-1"` to interactive icon buttons (like password visibility toggles) is a common anti-pattern that intentionally but erroneously breaks standard keyboard accessibility. Screen reader users and keyboard navigators rely on these buttons being in the tab order to securely manage their input.
+**Action:** When implementing input adornments or inline interactive elements, always ensure they are focusable (remove `tabindex="-1"`) and have descriptive `aria-label` attributes to maintain full accessibility.
