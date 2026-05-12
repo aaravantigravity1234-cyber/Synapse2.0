@@ -261,8 +261,8 @@ app.post("/api/chat", verifyFirebaseToken, rateLimit, async (req, res) => {
       params.top_p = 1.0;
     }
 
-    // Specialized Thinking Parameters for GLM 4.7
-    if (targetModel === "z-ai/glm4.7") {
+    // Specialized Thinking Parameters for qwen/qwen3.5-122b-a10b
+    if (targetModel === "qwen/qwen3.5-122b-a10b") {
       params.chat_template_kwargs = { "enable_thinking": true, "clear_thinking": false };
       params.max_tokens = 16384;
     }
